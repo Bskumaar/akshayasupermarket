@@ -1,0 +1,313 @@
+import React, { useState, useRef, useCallback } from "react";
+
+function ImageCreator() {
+  const [image, setImage] = useState(null);
+  const [productName, setProductName] = useState("");
+  const [mrp, setMrp] = useState("");
+  const [ourPrice, setOurPrice] = useState("");
+  const [save, setSave] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState("");
+  const canvasRef = useRef(null);
+
+  const handleImageUpload = useCallback((e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image size should be less than 5MB");
+        return;
+      }
+      setError("");
+      setImage(URL.createObjectURL(file));
+    }
+  }, []);
+
+  const handleNumericInput = useCallback((e, setter) => {
+    const value = e.target.value;
+    if (value === '' || /^\d+$/.test(value)) {
+      setter(value);
+    }
+  }, []);
+
+  const drawOnCanvas = useCallback((ctx, width, height, img) => {
+    // White background
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, width, height);
+
+    // Border
+    ctx.strokeStyle = "#ff6f00";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(0, 0, width, height);
+
+    // Product Name
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 36px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(productName || "Product Name", width / 2, 70);
+
+    if (img) {
+      const imgWidth = width / 2 - 60;
+      const imgHeight = height - 200; // Increased to accommodate footer
+      ctx.drawImage(img, 40, 100, imgWidth, imgHeight);
+
+      const boxX = width / 2 + 20;
+      const boxWidth = width / 2 - 60;
+
+      // MRP - New color (deep orange)
+      ctx.fillStyle = "#ff7043";
+      ctx.fillRect(boxX, 100, boxWidth, 80);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 28px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("MRP", boxX + boxWidth / 2, 130);
+      ctx.font = "bold 32px Arial";
+      ctx.fillText(`Rs.${mrp || "0"}`, boxX + boxWidth / 2, 165);
+
+      // Our Price - New color (vibrant green) and increased height
+      ctx.fillStyle = "#4caf50";
+      ctx.fillRect(boxX, 200, boxWidth, 140); // Increased height
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 28px Arial";
+      ctx.fillText("Our Price", boxX + boxWidth / 2, 240);
+      ctx.font = "bold 38px Arial"; // Larger font for emphasis
+      ctx.fillText(`Rs.${ourPrice || "0"}`, boxX + boxWidth / 2, 290);
+
+      // Save - New color (vibrant blue)
+      ctx.fillStyle = "#2196f3";
+      ctx.fillRect(boxX, 360, boxWidth, 80);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 28px Arial";
+      ctx.fillText("Save", boxX + boxWidth / 2, 395);
+      ctx.font = "bold 32px Arial";
+      ctx.fillText(`Rs.${save || "0"}`, boxX + boxWidth / 2, 430);
+
+      // Footer text
+      ctx.fillStyle = "#333";
+      ctx.font = "italic 20px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("@Akshaya Super Market, Perambalur-9500 080808", width / 2, height - 30);
+    }
+  }, [productName, mrp, ourPrice, save]);
+
+  const handleCreateImage = useCallback(() => {
+    if (!image) {
+      setError("Please upload an image first");
+      return;
+    }
+    
+    setError("");
+    setIsCreating(true);
+
+    setTimeout(() => {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+
+      const width = 800;
+      const height = 650; // Increased to accommodate footer
+      canvas.width = width;
+      canvas.height = height;
+
+      if (image) {
+        const img = new Image();
+        img.src = image;
+        img.onload = () => {
+          drawOnCanvas(ctx, width, height, img);
+          setPreviewUrl(canvas.toDataURL("image/png"));
+          setIsCreating(false);
+          
+          // Scroll to preview section
+          document.getElementById('preview-section').scrollIntoView({ 
+            behavior: 'smooth' 
+          });
+        };
+      } else {
+        setIsCreating(false);
+      }
+    }, 500);
+  }, [image, drawOnCanvas]);
+
+  const handleDownload = useCallback(() => {
+    if (previewUrl) {
+      const link = document.createElement("a");
+      link.download = "offer-card.png";
+      link.href = previewUrl;
+      link.click();
+    }
+  }, [previewUrl]);
+
+  const handleReset = useCallback(() => {
+    setImage(null);
+    setProductName("");
+    setMrp("");
+    setOurPrice("");
+    setSave("");
+    setPreviewUrl(null);
+    setError("");
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-8">
+        <h2 className="text-center mb-6 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-700">
+          🛒 Offer Card Generator
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Upload Section */}
+          <div className="bg-gray-50 p-5 rounded-lg">
+            <label className="block font-medium text-gray-700 mb-2">
+              Upload Product Image
+            </label>
+            <div className="flex items-center justify-center w-full">
+              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition-all duration-300">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                  </svg>
+                  <p className="mb-2 text-sm text-gray-500">Click to upload or drag and drop</p>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF (Max 5MB)</p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            
+            {image && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
+                <img src={image} alt="Preview" className="mx-auto h-32 object-contain rounded-lg border" />
+              </div>
+            )}
+          </div>
+          
+          {/* Inputs Section */}
+          <div className="space-y-4">
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">
+                Product Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter product name"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block font-medium text-gray-700 mb-2">
+                  MRP (₹)
+                </label>
+                <input
+                  type="text"
+                  placeholder="0"
+                  value={mrp}
+                  onChange={(e) => handleNumericInput(e, setMrp)}
+                  className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block font-medium text-gray-700 mb-2">
+                  Our Price (₹)
+                </label>
+                <input
+                  type="text"
+                  placeholder="0"
+                  value={ourPrice}
+                  onChange={(e) => handleNumericInput(e, setOurPrice)}
+                  className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">
+                Save (₹)
+              </label>
+              <input
+                type="text"
+                placeholder="0"
+                value={save}
+                onChange={(e) => handleNumericInput(e, setSave)}
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+              />
+            </div>
+            
+            {error && (
+              <div className="text-red-500 p-3 bg-red-50 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex gap-3 justify-center pt-4">
+              <button
+                onClick={handleCreateImage}
+                disabled={isCreating}
+                className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-3 rounded-lg transition-all shadow-md hover:shadow-lg"
+              >
+                {isCreating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Create Offer Card
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={handleReset}
+                className="px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-all"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Preview Section */}
+        {previewUrl && (
+          <div id="preview-section" className="mt-8 bg-gray-50 p-5 rounded-lg">
+            <h3 className="text-center text-xl font-semibold text-gray-800 mb-4">
+              Offer Card Preview
+            </h3>
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-lg">
+                <img src={previewUrl} alt="Offer Card" className="w-full rounded-lg border-4 border-orange-500" />
+              </div>
+            </div>
+            
+            <div className="flex justify-center gap-4 mt-6">
+              <button
+                onClick={handleDownload}
+                className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Download
+              </button>
+            </div>
+          </div>
+        )}
+
+        <canvas ref={canvasRef} className="hidden"></canvas>
+      </div>
+    </div>
+  );
+}
+
+export default ImageCreator;
