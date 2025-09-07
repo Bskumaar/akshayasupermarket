@@ -12,9 +12,11 @@ function ImageCreator() {
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState("")
   const [selectedStyle, setSelectedStyle] = useState("style1")
+  const [customFontSize, setCustomFontSize] = useState(null)
+  const [fontStyle, setFontStyle] = useState("'Segoe UI', Arial, sans-serif")
+  const [fontWeight, setFontWeight] = useState("bold")
   const canvasRef = useRef(null)
 
-  // Style options
   const styleOptions = [
     { id: "style1", name: "Modern Orange", previewColor: "bg-orange-500" },
     { id: "style2", name: "Elegant Blue", previewColor: "bg-blue-500" },
@@ -23,19 +25,16 @@ function ImageCreator() {
     { id: "style5", name: "Vibrant Purple", previewColor: "bg-purple-500" }
   ]
 
-  // Auto calculate Save = MRP - Our Price
+  // Save calculation
   useEffect(() => {
     if (mrp && ourPrice) {
       const m = parseInt(mrp, 10) || 0
       const p = parseInt(ourPrice, 10) || 0
-      const s = Math.max(0, m - p) // negative values தவிர்க்கும்
+      const s = Math.max(0, m - p)
       setSave(s.toString())
-    } else {
-      setSave("0")
-    }
+    } else setSave("0")
   }, [mrp, ourPrice])
 
-  // Image upload handler
   const handleImageUpload = useCallback((e) => {
     const file = e.target.files[0]
     if (file) {
@@ -48,15 +47,11 @@ function ImageCreator() {
     }
   }, [])
 
-  // Numeric input handler
   const handleNumericInput = useCallback((e, setter) => {
     const value = e.target.value
-    if (value === "" || /^\d+$/.test(value)) {
-      setter(value)
-    }
+    if (value === "" || /^\d+$/.test(value)) setter(value)
   }, [])
 
-  // Style colors based on selection
   const getStyleColors = (styleId) => {
     switch(styleId) {
       case "style1": return { titleGradient: ["#f97316","#ea580c"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#10b981","#059669"], saveGradient:["#3b82f6","#2563eb"], footerColor:"#1e293b", phoneColor:"#64748b", continentalColor:"#0f172a" }
@@ -72,32 +67,26 @@ function ImageCreator() {
   const drawOnCanvas = useCallback(
     (ctx, width, height, img) => {
       const colors = getStyleColors(selectedStyle)
-
-      // Background White
       ctx.fillStyle = "#ffffff"
-      ctx.fillRect(0,0,width,height)
+      ctx.fillRect(0,0,width,height) // white bg
 
-      // Border frame
-      ctx.shadowColor = "rgba(0,0,0,0.1)"
-      ctx.shadowBlur = 20
-      ctx.shadowOffsetX = 0
-      ctx.shadowOffsetY = 10
-      ctx.strokeStyle = "#cbd5e1"
-      ctx.lineWidth = 2
-      ctx.strokeRect(10,10,width-20,height-20)
-      ctx.shadowBlur = 0
-
-      // Title with dynamic font size
+      // Dynamic font size
       const getTitleFontSize = (name) => {
-        if(name.length>20) return 28
-        if(name.length>15) return 34
-        return 42
+        const maxFont = 50
+        const minFont = 20
+        const maxLength = 25
+        if(!name) return maxFont
+        if(name.length <= maxLength) return maxFont
+        const scale = maxLength / name.length
+        const fontSize = Math.floor(maxFont * scale)
+        return fontSize < minFont ? minFont : fontSize
       }
+      const titleFontSize = customFontSize || getTitleFontSize(productName)
       const titleGradient = ctx.createLinearGradient(0,30,0,80)
       titleGradient.addColorStop(0, colors.titleGradient[0])
       titleGradient.addColorStop(1, colors.titleGradient[1])
       ctx.fillStyle = titleGradient
-      ctx.font = `bold ${getTitleFontSize(productName)}px 'Segoe UI', Arial, sans-serif`
+      ctx.font = `${fontWeight} ${titleFontSize}px ${fontStyle}`
       ctx.textAlign = "center"
       ctx.fillText(productName || "Product Name", width/2, 70)
 
@@ -107,7 +96,7 @@ function ImageCreator() {
         const imgWidth = width/2 - 60
         const imgHeight = boxHeight
 
-        // Left side image
+        // Left image
         ctx.save()
         ctx.beginPath()
         ctx.roundRect(40, boxY, imgWidth, imgHeight, 15)
@@ -119,7 +108,7 @@ function ImageCreator() {
         ctx.roundRect(40, boxY, imgWidth, imgHeight, 15)
         ctx.stroke()
 
-        // Right side price boxes
+        // Right price boxes
         const boxX = width/2 + 20
         const boxWidth = width/2 - 60
         const mrpHeight = boxHeight*0.2
@@ -179,31 +168,22 @@ function ImageCreator() {
         ctx.textBaseline = "bottom"
         ctx.textAlign = "center"
         ctx.fillText("Akshaya Super Market, Perambalur", width/2, height-50)
-
         ctx.fillStyle = colors.phoneColor
         ctx.font = "500 22px 'Segoe UI'"
-        ctx.textAlign = "center"
         ctx.fillText("📞 9500 080808", width/2, height-20)
-
         ctx.fillStyle = colors.continentalColor
         ctx.font = "italic 22px 'Segoe UI'"
         ctx.textAlign = "right"
         ctx.fillText("Continental Apply", width-30, height-20)
       }
     },
-    [productName, mrp, ourPrice, save, selectedStyle],
+    [productName, mrp, ourPrice, save, selectedStyle, customFontSize, fontStyle, fontWeight]
   )
 
-  // Create canvas image
   const handleCreateImage = useCallback(() => {
-    if(!image){
-      setError("Please upload an image first")
-      return
-    }
-
+    if(!image){ setError("Please upload an image first"); return }
     setError("")
     setIsCreating(true)
-
     setTimeout(()=>{
       const canvas = canvasRef.current
       const ctx = canvas.getContext("2d")
@@ -211,7 +191,6 @@ function ImageCreator() {
       const height = 650
       canvas.width = width
       canvas.height = height
-
       const imgObj = new Image()
       imgObj.src = image
       imgObj.onload = () => {
@@ -223,7 +202,6 @@ function ImageCreator() {
     },500)
   },[image, drawOnCanvas])
 
-  // Download using product name
   const handleDownload = useCallback(() => {
     if(previewUrl){
       const link = document.createElement("a")
@@ -234,7 +212,6 @@ function ImageCreator() {
     }
   },[previewUrl, productName])
 
-  // Reset all
   const handleReset = useCallback(()=>{
     setImage(null)
     setProductName("")
@@ -244,6 +221,9 @@ function ImageCreator() {
     setPreviewUrl(null)
     setError("")
     setSelectedStyle("style1")
+    setCustomFontSize(null)
+    setFontStyle("'Segoe UI', Arial, sans-serif")
+    setFontWeight("bold")
   },[])
 
   return (
@@ -254,35 +234,55 @@ function ImageCreator() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* Upload Section */}
           <div className="bg-gray-50 p-5 rounded-lg">
             <label className="block font-medium text-gray-700 mb-2">Upload Product Image</label>
             <div className="flex items-center justify-center w-full">
               <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                  </svg>
                   <p className="mb-2 text-sm text-gray-500">Click to upload or drag and drop</p>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF (Max 5MB)</p>
                 </div>
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden"/>
               </label>
             </div>
-
-            {image && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
-                <img src={image} alt="Preview" className="mx-auto h-32 object-contain rounded-lg border"/>
-              </div>
-            )}
+            {image && <div className="mt-4 text-center"><img src={image} alt="Preview" className="mx-auto h-32 object-contain rounded-lg border"/></div>}
           </div>
 
-          {/* Inputs Section */}
           <div className="space-y-4">
             <div>
               <label className="block font-medium text-gray-700 mb-2">Product Name</label>
               <input type="text" placeholder="Enter product name" value={productName} onChange={(e)=>setProductName(e.target.value)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"/>
+            </div>
+
+            {/* Font size */}
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Font Size</label>
+              <input type="range" min="20" max="60" value={customFontSize || 42} onChange={(e)=>setCustomFontSize(parseInt(e.target.value))} className="w-full"/>
+              <p className="text-xs text-gray-500 mt-1">{customFontSize || 42}px</p>
+            </div>
+
+            {/* Font style */}
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Font Style</label>
+              <select value={fontStyle} onChange={(e)=>setFontStyle(e.target.value)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                <option value="'Segoe UI', Arial, sans-serif">Segoe UI</option>
+                <option value="'Arial Black', Gadget, sans-serif">Arial Black</option>
+                <option value="'Courier New', Courier, monospace">Courier New</option>
+                <option value="'Georgia', serif">Georgia</option>
+                <option value="'Tahoma', Geneva, sans-serif">Tahoma</option>
+                <option value="'Verdana', Geneva, sans-serif">Verdana</option>
+                <option value="'Impact', Charcoal, sans-serif">Impact</option>
+                <option value="'Lucida Console', Monaco, monospace">Lucida Console</option>
+              </select>
+            </div>
+
+            {/* Font weight */}
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Font Weight</label>
+              <select value={fontWeight} onChange={(e)=>setFontWeight(e.target.value)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                <option value="normal">Normal</option>
+                <option value="bold">Bold</option>
+              </select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -296,7 +296,7 @@ function ImageCreator() {
               </div>
             </div>
 
-            {/* Style Selection */}
+            {/* Style selection */}
             <div>
               <label className="block font-medium text-gray-700 mb-2">Card Style</label>
               <div className="grid grid-cols-5 gap-2">
@@ -311,7 +311,6 @@ function ImageCreator() {
 
             {error && <div className="text-red-500 p-3 bg-red-50 rounded-lg">{error}</div>}
 
-            {/* Buttons */}
             <div className="flex gap-3 justify-center pt-4">
               <button onClick={handleCreateImage} disabled={isCreating} className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
                 {isCreating ? <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>Creating...</> : <>Create Offer Card</>}
@@ -321,7 +320,6 @@ function ImageCreator() {
           </div>
         </div>
 
-        {/* Preview Section */}
         {previewUrl && (
           <div id="preview-section" className="mt-8 bg-gray-50 p-5 rounded-lg">
             <h3 className="text-center text-xl font-semibold text-gray-800 mb-4">Offer Card Preview</h3>
@@ -330,13 +328,11 @@ function ImageCreator() {
                 <img src={previewUrl} alt="Offer Card" className="w-full rounded-lg border-4 border-orange-500"/>
               </div>
             </div>
-
             <div className="flex justify-center gap-4 mt-6">
               <button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium">Download</button>
             </div>
           </div>
         )}
-
         <canvas ref={canvasRef} className="hidden"></canvas>
       </div>
     </div>
