@@ -67,6 +67,7 @@ function ImageCreator() {
         phoneColor: "0f172a", 
         continentalColor: "#0f172a", 
         borderColor: "#fdba74",
+        priceBorderColor: "#3b82f6", // Blue border for Our Price box
         mrpTextColor: "#000000", // Black text for MRP
         priceTextColor: "#000000", // Black text for Our Price
         saveTextColor: "#000000" // Black text for Save
@@ -80,6 +81,7 @@ function ImageCreator() {
         phoneColor:"#374151", 
         continentalColor:"#1e3a8a", 
         borderColor:"#93c5fd",
+        priceBorderColor: "#93c5fd",
         mrpTextColor: "#ffffff",
         priceTextColor: "#ffffff",
         saveTextColor: "#ffffff"
@@ -93,6 +95,7 @@ function ImageCreator() {
         phoneColor:"#57534e", 
         continentalColor:"#713f12", 
         borderColor:"#fcd34d",
+        priceBorderColor: "#fcd34d",
         mrpTextColor: "#ffffff",
         priceTextColor: "#ffffff",
         saveTextColor: "#ffffff"
@@ -106,6 +109,7 @@ function ImageCreator() {
         phoneColor:"#374151", 
         continentalColor:"#14532d", 
         borderColor:"#86efac",
+        priceBorderColor: "#86efac",
         mrpTextColor: "#ffffff",
         priceTextColor: "#ffffff",
         saveTextColor: "#ffffff"
@@ -119,6 +123,7 @@ function ImageCreator() {
         phoneColor:"#4b5563", 
         continentalColor:"#581c87", 
         borderColor:"#d8b4fe",
+        priceBorderColor: "#d8b4fe",
         mrpTextColor: "#ffffff",
         priceTextColor: "#ffffff",
         saveTextColor: "#ffffff"
@@ -132,6 +137,7 @@ function ImageCreator() {
         phoneColor:"#64748b", 
         continentalColor:"#0f172a", 
         borderColor:"#fdba74",
+        priceBorderColor: "#3b82f6",
         mrpTextColor: "#ffffff",
         priceTextColor: "#ffffff",
         saveTextColor: "#ffffff"
@@ -144,14 +150,21 @@ function ImageCreator() {
     (ctx, width, height, img) => {
       const colors = getStyleColors(selectedStyle)
       
-      // Add border around the entire canvas
-      const borderWidth = 8;
-      ctx.fillStyle = colors.borderColor;
-      ctx.fillRect(0, 0, width, height); // Fill entire canvas with border color
+      // Add border around the entire canvas with rounded corners
+      const borderWidth = 4;
+      const borderRadius = 10; // Increased from default for rounder corners
       
-      // Draw white background slightly smaller to create border effect
+      // Draw rounded border
+      ctx.fillStyle = colors.borderColor;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, width, height, borderRadius);
+      ctx.fill();
+      
+      // Draw white background slightly smaller to create border effect with rounded corners
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(borderWidth, borderWidth, width - borderWidth * 2, height - borderWidth * 2);
+      ctx.beginPath();
+      ctx.roundRect(borderWidth, borderWidth, width - borderWidth * 2, height - borderWidth * 2, borderRadius - 4);
+      ctx.fill();
 
       // Fixed font size of 42px
       const titleFontSize = 42
@@ -192,9 +205,9 @@ function ImageCreator() {
         const boxWidth = width/2 - 60
         
         // Increased heights for MRP and Save boxes
-        const mrpHeight = boxHeight*0.25  // Increased from 0.2 to 0.25
-        const ourPriceHeight = boxHeight*0.5  // Decreased from 0.6 to 0.5 to accommodate larger MRP and Save boxes
-        const saveHeight = boxHeight*0.25  // Increased from 0.2 to 0.25
+        const mrpHeight = boxHeight*0.20  // Increased from 0.2 to 0.25
+        const ourPriceHeight = boxHeight*0.6  // Decreased from 0.6 to 0.5 to accommodate larger MRP and Save boxes
+        const saveHeight = boxHeight*0.20  // Increased from 0.2 to 0.25
 
         // MRP - Indian Saffron
         const mrpGradient = ctx.createLinearGradient(boxX, boxY, boxX, boxY+mrpHeight)
@@ -206,8 +219,8 @@ function ImageCreator() {
         ctx.fill()
         ctx.fillStyle = colors.mrpTextColor
         ctx.textAlign = "center"
-        // Increased MRP font size from 28px to 32px
-        ctx.font = "bold 32px 'Segoe UI'"
+        // Increased MRP font size from 28px to 38px
+        ctx.font = "bold 43px 'Segoe UI'"
         ctx.fillText(`MRP ₹${mrp||"0"}`, boxX+boxWidth/2, boxY+mrpHeight/2+10)
 
         // Our Price - Indian White with EXTREMELY LARGE text
@@ -219,15 +232,23 @@ function ImageCreator() {
         ctx.beginPath()
         ctx.roundRect(boxX, priceY, boxWidth, ourPriceHeight-10, 12)
         ctx.fill()
+        
+        // Add blue border to Our Price box for Modern Orange style
+        ctx.strokeStyle = colors.priceBorderColor
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.roundRect(boxX, priceY, boxWidth, ourPriceHeight-10, 12)
+        ctx.stroke()
+        
         ctx.fillStyle = colors.priceTextColor
         ctx.textAlign = "center"
         
-        // Very large "Our Price" text - increased from 36px to 40px
-        ctx.font = "bold 40px 'Segoe UI'"
+        // Very large "Our Price" text - increased from 36px to 44px
+        ctx.font = "bold 50px 'Segoe UI'"
         ctx.fillText("Our Price", boxX+boxWidth/2, priceY+ourPriceHeight/2-40)
         
-        // EXTREMELY large price text - "₹" and price on same line - increased from 70px to 80px
-        ctx.font = "bold 80px 'Segoe UI'"
+        // EXTREMELY large price text - "₹" and price on same line - increased from 70px to 85px
+        ctx.font = "bold 90px 'Segoe UI'"
         ctx.fillText(`₹${ourPrice||"0"}`, boxX+boxWidth/2, priceY+ourPriceHeight/2+40)
 
         // Save - Indian Green
@@ -241,8 +262,8 @@ function ImageCreator() {
         ctx.fill()
         ctx.fillStyle = colors.saveTextColor
         ctx.textAlign = "center"
-        // Increased Save font size from 28px to 32px
-        ctx.font = "bold 32px 'Segoe UI'"
+        // Increased Save font size from 28px to 38px
+        ctx.font = "bold 43px 'Segoe UI'"
         ctx.fillText(`You Save ₹${save||"0"}`, boxX+boxWidth/2, saveY+saveHeight/2+10)
 
         // Footer
@@ -257,7 +278,7 @@ function ImageCreator() {
         ctx.fillStyle = colors.continentalColor
         ctx.font = "italic 22px 'Segoe UI'"
         ctx.textAlign = "right"
-        ctx.fillText("Conditional Apply", width-30 - borderWidth, height-20 - borderWidth)
+        ctx.fillText("Conditions Apply", width-30 - borderWidth, height-20 - borderWidth)
       }
     },
     [productName, mrp, ourPrice, save, selectedStyle]
@@ -331,7 +352,7 @@ function ImageCreator() {
 
           <div className="space-y-4">
             <div>
-              <label className="block font-medium text-gray-700 mb-2">Product Name</label>
+              <label className="block font-medium text-gray-700 mb-2">Product Name (max 30 characters)</label>
               <input 
                 type="text" 
                 placeholder="Enter product name" 
