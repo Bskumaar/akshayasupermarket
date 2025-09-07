@@ -5,13 +5,11 @@ import './App.css'
 import ImageCreator from './ImageCreator'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-     <ImageCreator/>
-    </>
-  )
+    <div className="App">
+      <ImageCreator/>
+    </div>
+  );
 }
 
-export default App
+export default App;

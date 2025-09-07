@@ -1,150 +1,250 @@
-import React, { useState, useRef, useCallback } from "react";
+"use client"
+
+import { useState, useRef, useCallback, useEffect } from "react"
 
 function ImageCreator() {
-  const [image, setImage] = useState(null);
-  const [productName, setProductName] = useState("");
-  const [mrp, setMrp] = useState("");
-  const [ourPrice, setOurPrice] = useState("");
-  const [save, setSave] = useState("");
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [error, setError] = useState("");
-  const canvasRef = useRef(null);
+  const [image, setImage] = useState(null)
+  const [productName, setProductName] = useState("")
+  const [mrp, setMrp] = useState("")
+  const [ourPrice, setOurPrice] = useState("")
+  const [save, setSave] = useState("0")
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const [isCreating, setIsCreating] = useState(false)
+  const [error, setError] = useState("")
+  const [selectedStyle, setSelectedStyle] = useState("style1")
+  const canvasRef = useRef(null)
 
+  // Style options
+  const styleOptions = [
+    { id: "style1", name: "Modern Orange", previewColor: "bg-orange-500" },
+    { id: "style2", name: "Elegant Blue", previewColor: "bg-blue-500" },
+    { id: "style3", name: "Premium Gold", previewColor: "bg-yellow-500" },
+    { id: "style4", name: "Fresh Green", previewColor: "bg-green-500" },
+    { id: "style5", name: "Vibrant Purple", previewColor: "bg-purple-500" }
+  ]
+
+  // Auto calculate Save = MRP - Our Price
+  useEffect(() => {
+    if (mrp && ourPrice) {
+      const m = parseInt(mrp, 10) || 0
+      const p = parseInt(ourPrice, 10) || 0
+      const s = Math.max(0, m - p) // negative values தவிர்க்கும்
+      setSave(s.toString())
+    } else {
+      setSave("0")
+    }
+  }, [mrp, ourPrice])
+
+  // Image upload handler
   const handleImageUpload = useCallback((e) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setError("Image size should be less than 5MB");
-        return;
+        setError("Image size should be less than 5MB")
+        return
       }
-      setError("");
-      setImage(URL.createObjectURL(file));
+      setError("")
+      setImage(URL.createObjectURL(file))
     }
-  }, []);
+  }, [])
 
+  // Numeric input handler
   const handleNumericInput = useCallback((e, setter) => {
-    const value = e.target.value;
-    if (value === '' || /^\d+$/.test(value)) {
-      setter(value);
+    const value = e.target.value
+    if (value === "" || /^\d+$/.test(value)) {
+      setter(value)
     }
-  }, []);
+  }, [])
 
-  const drawOnCanvas = useCallback((ctx, width, height, img) => {
-    // White background
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, width, height);
-
-    // Border
-    ctx.strokeStyle = "#ff6f00";
-    ctx.lineWidth = 6;
-    ctx.strokeRect(0, 0, width, height);
-
-    // Product Name
-    ctx.fillStyle = "#000";
-    ctx.font = "bold 36px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(productName || "Product Name", width / 2, 70);
-
-    if (img) {
-      const imgWidth = width / 2 - 60;
-      const imgHeight = height - 200; // Increased to accommodate footer
-      ctx.drawImage(img, 40, 100, imgWidth, imgHeight);
-
-      const boxX = width / 2 + 20;
-      const boxWidth = width / 2 - 60;
-
-      // MRP - New color (deep orange)
-      ctx.fillStyle = "#ff7043";
-      ctx.fillRect(boxX, 100, boxWidth, 80);
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 28px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("MRP", boxX + boxWidth / 2, 130);
-      ctx.font = "bold 32px Arial";
-      ctx.fillText(`Rs.${mrp || "0"}`, boxX + boxWidth / 2, 165);
-
-      // Our Price - New color (vibrant green) and increased height
-      ctx.fillStyle = "#4caf50";
-      ctx.fillRect(boxX, 200, boxWidth, 140); // Increased height
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 28px Arial";
-      ctx.fillText("Our Price", boxX + boxWidth / 2, 240);
-      ctx.font = "bold 38px Arial"; // Larger font for emphasis
-      ctx.fillText(`Rs.${ourPrice || "0"}`, boxX + boxWidth / 2, 290);
-
-      // Save - New color (vibrant blue)
-      ctx.fillStyle = "#2196f3";
-      ctx.fillRect(boxX, 360, boxWidth, 80);
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 28px Arial";
-      ctx.fillText("Save", boxX + boxWidth / 2, 395);
-      ctx.font = "bold 32px Arial";
-      ctx.fillText(`Rs.${save || "0"}`, boxX + boxWidth / 2, 430);
-
-      // Footer text
-      ctx.fillStyle = "#333";
-      ctx.font = "italic 20px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("@Akshaya Super Market, Perambalur-9500 080808", width / 2, height - 30);
+  // Style colors based on selection
+  const getStyleColors = (styleId) => {
+    switch(styleId) {
+      case "style1": return { titleGradient: ["#f97316","#ea580c"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#10b981","#059669"], saveGradient:["#3b82f6","#2563eb"], footerColor:"#1e293b", phoneColor:"#64748b", continentalColor:"#0f172a" }
+      case "style2": return { titleGradient: ["#0ea5e9","#0369a1"], mrpGradient:["#6366f1","#4f46e5"], priceGradient:["#0ea5e9","#0369a1"], saveGradient:["#8b5cf6","#7c3aed"], footerColor:"#1e40af", phoneColor:"#374151", continentalColor:"#1e3a8a" }
+      case "style3": return { titleGradient: ["#d97706","#b45309"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#d97706","#b45309"], saveGradient:["#a16207","#854d0e"], footerColor:"#78350f", phoneColor:"#57534e", continentalColor:"#713f12" }
+      case "style4": return { titleGradient: ["#22c55e","#15803d"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#22c55e","#15803d"], saveGradient:["#84cc16","#65a30d"], footerColor:"#166534", phoneColor:"#374151", continentalColor:"#14532d" }
+      case "style5": return { titleGradient: ["#a855f7","#9333ea"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#a855f7","#9333ea"], saveGradient:["#ec4899","#db2777"], footerColor:"#6b21a8", phoneColor:"#4b5563", continentalColor:"#581c87" }
+      default: return { titleGradient:["#f97316","#ea580c"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#10b981","#059669"], saveGradient:["#3b82f6","#2563eb"], footerColor:"#1e293b", phoneColor:"#64748b", continentalColor:"#0f172a" }
     }
-  }, [productName, mrp, ourPrice, save]);
+  }
 
-  const handleCreateImage = useCallback(() => {
-    if (!image) {
-      setError("Please upload an image first");
-      return;
-    }
-    
-    setError("");
-    setIsCreating(true);
+  // Draw canvas
+  const drawOnCanvas = useCallback(
+    (ctx, width, height, img) => {
+      const colors = getStyleColors(selectedStyle)
 
-    setTimeout(() => {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
+      // Background White
+      ctx.fillStyle = "#ffffff"
+      ctx.fillRect(0,0,width,height)
 
-      const width = 800;
-      const height = 650; // Increased to accommodate footer
-      canvas.width = width;
-      canvas.height = height;
+      // Border frame
+      ctx.shadowColor = "rgba(0,0,0,0.1)"
+      ctx.shadowBlur = 20
+      ctx.shadowOffsetX = 0
+      ctx.shadowOffsetY = 10
+      ctx.strokeStyle = "#cbd5e1"
+      ctx.lineWidth = 2
+      ctx.strokeRect(10,10,width-20,height-20)
+      ctx.shadowBlur = 0
 
-      if (image) {
-        const img = new Image();
-        img.src = image;
-        img.onload = () => {
-          drawOnCanvas(ctx, width, height, img);
-          setPreviewUrl(canvas.toDataURL("image/png"));
-          setIsCreating(false);
-          
-          // Scroll to preview section
-          document.getElementById('preview-section').scrollIntoView({ 
-            behavior: 'smooth' 
-          });
-        };
-      } else {
-        setIsCreating(false);
+      // Title with dynamic font size
+      const getTitleFontSize = (name) => {
+        if(name.length>20) return 28
+        if(name.length>15) return 34
+        return 42
       }
-    }, 500);
-  }, [image, drawOnCanvas]);
+      const titleGradient = ctx.createLinearGradient(0,30,0,80)
+      titleGradient.addColorStop(0, colors.titleGradient[0])
+      titleGradient.addColorStop(1, colors.titleGradient[1])
+      ctx.fillStyle = titleGradient
+      ctx.font = `bold ${getTitleFontSize(productName)}px 'Segoe UI', Arial, sans-serif`
+      ctx.textAlign = "center"
+      ctx.fillText(productName || "Product Name", width/2, 70)
 
-  const handleDownload = useCallback(() => {
-    if (previewUrl) {
-      const link = document.createElement("a");
-      link.download = "offer-card.png";
-      link.href = previewUrl;
-      link.click();
+      if(img){
+        const boxY = 100
+        const boxHeight = height-200
+        const imgWidth = width/2 - 60
+        const imgHeight = boxHeight
+
+        // Left side image
+        ctx.save()
+        ctx.beginPath()
+        ctx.roundRect(40, boxY, imgWidth, imgHeight, 15)
+        ctx.clip()
+        ctx.drawImage(img,40,boxY,imgWidth,imgHeight)
+        ctx.restore()
+        ctx.strokeStyle = "#e2e8f0"
+        ctx.lineWidth = 1
+        ctx.roundRect(40, boxY, imgWidth, imgHeight, 15)
+        ctx.stroke()
+
+        // Right side price boxes
+        const boxX = width/2 + 20
+        const boxWidth = width/2 - 60
+        const mrpHeight = boxHeight*0.2
+        const ourPriceHeight = boxHeight*0.6
+        const saveHeight = boxHeight*0.2
+
+        // MRP
+        const mrpGradient = ctx.createLinearGradient(boxX, boxY, boxX, boxY+mrpHeight)
+        mrpGradient.addColorStop(0, colors.mrpGradient[0])
+        mrpGradient.addColorStop(1, colors.mrpGradient[1])
+        ctx.fillStyle = mrpGradient
+        ctx.beginPath()
+        ctx.roundRect(boxX, boxY, boxWidth, mrpHeight-10, 12)
+        ctx.fill()
+        ctx.fillStyle = "#fff"
+        ctx.textAlign = "center"
+        ctx.font = "600 22px 'Segoe UI'"
+        ctx.fillText("MRP", boxX+boxWidth/2, boxY+mrpHeight/2-5)
+        ctx.font = "bold 26px 'Segoe UI'"
+        ctx.fillText(`₹${mrp||"0"}`, boxX+boxWidth/2, boxY+mrpHeight/2+25)
+
+        // Our Price
+        const priceY = boxY+mrpHeight
+        const priceGradient = ctx.createLinearGradient(boxX, priceY, boxX, priceY+ourPriceHeight)
+        priceGradient.addColorStop(0, colors.priceGradient[0])
+        priceGradient.addColorStop(1, colors.priceGradient[1])
+        ctx.fillStyle = priceGradient
+        ctx.beginPath()
+        ctx.roundRect(boxX, priceY, boxWidth, ourPriceHeight-10, 12)
+        ctx.fill()
+        ctx.fillStyle = "#fff"
+        ctx.textAlign = "center"
+        ctx.font = "600 28px 'Segoe UI'"
+        ctx.fillText("Our Price", boxX+boxWidth/2, priceY+ourPriceHeight/2-20)
+        ctx.font = "bold 40px 'Segoe UI'"
+        ctx.fillText(`₹${ourPrice||"0"}`, boxX+boxWidth/2, priceY+ourPriceHeight/2+25)
+
+        // Save
+        const saveY = priceY+ourPriceHeight
+        const saveGradient = ctx.createLinearGradient(boxX, saveY, boxX, saveY+saveHeight)
+        saveGradient.addColorStop(0, colors.saveGradient[0])
+        saveGradient.addColorStop(1, colors.saveGradient[1])
+        ctx.fillStyle = saveGradient
+        ctx.beginPath()
+        ctx.roundRect(boxX, saveY, boxWidth, saveHeight-10, 12)
+        ctx.fill()
+        ctx.fillStyle = "#fff"
+        ctx.textAlign = "center"
+        ctx.font = "600 22px 'Segoe UI'"
+        ctx.fillText("You Save", boxX+boxWidth/2, saveY+saveHeight/2-5)
+        ctx.font = "bold 26px 'Segoe UI'"
+        ctx.fillText(`₹${save||"0"}`, boxX+boxWidth/2, saveY+saveHeight/2+25)
+
+        // Footer
+        ctx.fillStyle = colors.footerColor
+        ctx.font = "600 26px 'Segoe UI'"
+        ctx.textBaseline = "bottom"
+        ctx.textAlign = "center"
+        ctx.fillText("Akshaya Super Market, Perambalur", width/2, height-50)
+
+        ctx.fillStyle = colors.phoneColor
+        ctx.font = "500 22px 'Segoe UI'"
+        ctx.textAlign = "center"
+        ctx.fillText("📞 9500 080808", width/2, height-20)
+
+        ctx.fillStyle = colors.continentalColor
+        ctx.font = "italic 22px 'Segoe UI'"
+        ctx.textAlign = "right"
+        ctx.fillText("Continental Apply", width-30, height-20)
+      }
+    },
+    [productName, mrp, ourPrice, save, selectedStyle],
+  )
+
+  // Create canvas image
+  const handleCreateImage = useCallback(() => {
+    if(!image){
+      setError("Please upload an image first")
+      return
     }
-  }, [previewUrl]);
 
-  const handleReset = useCallback(() => {
-    setImage(null);
-    setProductName("");
-    setMrp("");
-    setOurPrice("");
-    setSave("");
-    setPreviewUrl(null);
-    setError("");
-  }, []);
+    setError("")
+    setIsCreating(true)
+
+    setTimeout(()=>{
+      const canvas = canvasRef.current
+      const ctx = canvas.getContext("2d")
+      const width = 800
+      const height = 650
+      canvas.width = width
+      canvas.height = height
+
+      const imgObj = new Image()
+      imgObj.src = image
+      imgObj.onload = () => {
+        drawOnCanvas(ctx,width,height,imgObj)
+        setPreviewUrl(canvas.toDataURL("image/png"))
+        setIsCreating(false)
+        document.getElementById("preview-section").scrollIntoView({behavior:"smooth"})
+      }
+    },500)
+  },[image, drawOnCanvas])
+
+  // Download using product name
+  const handleDownload = useCallback(() => {
+    if(previewUrl){
+      const link = document.createElement("a")
+      const fileName = (productName || "offer-card").replace(/\s+/g,"_")+".png"
+      link.download = fileName
+      link.href = previewUrl
+      link.click()
+    }
+  },[previewUrl, productName])
+
+  // Reset all
+  const handleReset = useCallback(()=>{
+    setImage(null)
+    setProductName("")
+    setMrp("")
+    setOurPrice("")
+    setSave("0")
+    setPreviewUrl(null)
+    setError("")
+    setSelectedStyle("style1")
+  },[])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4">
@@ -156,124 +256,67 @@ function ImageCreator() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Upload Section */}
           <div className="bg-gray-50 p-5 rounded-lg">
-            <label className="block font-medium text-gray-700 mb-2">
-              Upload Product Image
-            </label>
+            <label className="block font-medium text-gray-700 mb-2">Upload Product Image</label>
             <div className="flex items-center justify-center w-full">
               <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                   </svg>
                   <p className="mb-2 text-sm text-gray-500">Click to upload or drag and drop</p>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF (Max 5MB)</p>
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden"/>
               </label>
             </div>
-            
+
             {image && (
               <div className="mt-4 text-center">
                 <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
-                <img src={image} alt="Preview" className="mx-auto h-32 object-contain rounded-lg border" />
+                <img src={image} alt="Preview" className="mx-auto h-32 object-contain rounded-lg border"/>
               </div>
             )}
           </div>
-          
+
           {/* Inputs Section */}
           <div className="space-y-4">
             <div>
-              <label className="block font-medium text-gray-700 mb-2">
-                Product Name
-              </label>
-              <input
-                type="text"
-                placeholder="Enter product name"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              />
+              <label className="block font-medium text-gray-700 mb-2">Product Name</label>
+              <input type="text" placeholder="Enter product name" value={productName} onChange={(e)=>setProductName(e.target.value)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"/>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block font-medium text-gray-700 mb-2">
-                  MRP (₹)
-                </label>
-                <input
-                  type="text"
-                  placeholder="0"
-                  value={mrp}
-                  onChange={(e) => handleNumericInput(e, setMrp)}
-                  className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                />
+                <label className="block font-medium text-gray-700 mb-2">MRP (₹)</label>
+                <input type="text" placeholder="0" value={mrp} onChange={(e)=>handleNumericInput(e,setMrp)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"/>
               </div>
               <div>
-                <label className="block font-medium text-gray-700 mb-2">
-                  Our Price (₹)
-                </label>
-                <input
-                  type="text"
-                  placeholder="0"
-                  value={ourPrice}
-                  onChange={(e) => handleNumericInput(e, setOurPrice)}
-                  className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                />
+                <label className="block font-medium text-gray-700 mb-2">Our Price (₹)</label>
+                <input type="text" placeholder="0" value={ourPrice} onChange={(e)=>handleNumericInput(e,setOurPrice)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"/>
               </div>
             </div>
-            
+
+            {/* Style Selection */}
             <div>
-              <label className="block font-medium text-gray-700 mb-2">
-                Save (₹)
-              </label>
-              <input
-                type="text"
-                placeholder="0"
-                value={save}
-                onChange={(e) => handleNumericInput(e, setSave)}
-                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              />
-            </div>
-            
-            {error && (
-              <div className="text-red-500 p-3 bg-red-50 rounded-lg">
-                {error}
+              <label className="block font-medium text-gray-700 mb-2">Card Style</label>
+              <div className="grid grid-cols-5 gap-2">
+                {styleOptions.map((style)=>(
+                  <button key={style.id} onClick={()=>setSelectedStyle(style.id)} className={`h-10 rounded-md flex items-center justify-center transition-all ${selectedStyle===style.id ? "ring-2 ring-offset-2 ring-orange-500" : "opacity-70 hover:opacity-100"}`} title={style.name}>
+                    <div className={`w-8 h-8 rounded-full ${style.previewColor}`}></div>
+                  </button>
+                ))}
               </div>
-            )}
+              <p className="text-xs text-gray-500 mt-1">Selected: {styleOptions.find(s=>s.id===selectedStyle)?.name}</p>
+            </div>
+
+            {error && <div className="text-red-500 p-3 bg-red-50 rounded-lg">{error}</div>}
 
             {/* Buttons */}
             <div className="flex gap-3 justify-center pt-4">
-              <button
-                onClick={handleCreateImage}
-                disabled={isCreating}
-                className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-3 rounded-lg transition-all shadow-md hover:shadow-lg"
-              >
-                {isCreating ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Create Offer Card
-                  </>
-                )}
+              <button onClick={handleCreateImage} disabled={isCreating} className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-3 rounded-lg transition-all shadow-md hover:shadow-lg">
+                {isCreating ? <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>Creating...</> : <>Create Offer Card</>}
               </button>
-              
-              <button
-                onClick={handleReset}
-                className="px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-all"
-              >
-                Reset
-              </button>
+              <button onClick={handleReset} className="px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition-all">Reset</button>
             </div>
           </div>
         </div>
@@ -281,25 +324,15 @@ function ImageCreator() {
         {/* Preview Section */}
         {previewUrl && (
           <div id="preview-section" className="mt-8 bg-gray-50 p-5 rounded-lg">
-            <h3 className="text-center text-xl font-semibold text-gray-800 mb-4">
-              Offer Card Preview
-            </h3>
+            <h3 className="text-center text-xl font-semibold text-gray-800 mb-4">Offer Card Preview</h3>
             <div className="flex justify-center">
               <div className="relative w-full max-w-lg">
-                <img src={previewUrl} alt="Offer Card" className="w-full rounded-lg border-4 border-orange-500" />
+                <img src={previewUrl} alt="Offer Card" className="w-full rounded-lg border-4 border-orange-500"/>
               </div>
             </div>
-            
+
             <div className="flex justify-center gap-4 mt-6">
-              <button
-                onClick={handleDownload}
-                className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
-                Download
-              </button>
+              <button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium">Download</button>
             </div>
           </div>
         )}
@@ -307,7 +340,7 @@ function ImageCreator() {
         <canvas ref={canvasRef} className="hidden"></canvas>
       </div>
     </div>
-  );
+  )
 }
 
-export default ImageCreator;
+export default ImageCreator
