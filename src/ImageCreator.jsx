@@ -12,9 +12,6 @@ function ImageCreator() {
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState("")
   const [selectedStyle, setSelectedStyle] = useState("style1")
-  const [customFontSize, setCustomFontSize] = useState(null)
-  const [fontStyle, setFontStyle] = useState("'Segoe UI', Arial, sans-serif")
-  const [fontWeight, setFontWeight] = useState("bold")
   const canvasRef = useRef(null)
 
   const styleOptions = [
@@ -52,14 +49,93 @@ function ImageCreator() {
     if (value === "" || /^\d+$/.test(value)) setter(value)
   }, [])
 
+  const handleProductNameChange = useCallback((e) => {
+    const value = e.target.value
+    if (value.length <= 30) {
+      setProductName(value)
+    }
+  }, [])
+
   const getStyleColors = (styleId) => {
     switch(styleId) {
-      case "style1": return { titleGradient: ["#f97316","#ea580c"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#10b981","#059669"], saveGradient:["#3b82f6","#2563eb"], footerColor:"#1e293b", phoneColor:"#64748b", continentalColor:"#0f172a" }
-      case "style2": return { titleGradient: ["#0ea5e9","#0369a1"], mrpGradient:["#6366f1","#4f46e5"], priceGradient:["#0ea5e9","#0369a1"], saveGradient:["#8b5cf6","#7c3aed"], footerColor:"#1e40af", phoneColor:"#374151", continentalColor:"#1e3a8a" }
-      case "style3": return { titleGradient: ["#d97706","#b45309"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#d97706","#b45309"], saveGradient:["#a16207","#854d0e"], footerColor:"#78350f", phoneColor:"#57534e", continentalColor:"#713f12" }
-      case "style4": return { titleGradient: ["#22c55e","#15803d"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#22c55e","#15803d"], saveGradient:["#84cc16","#65a30d"], footerColor:"#166534", phoneColor:"#374151", continentalColor:"#14532d" }
-      case "style5": return { titleGradient: ["#a855f7","#9333ea"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#a855f7","#9333ea"], saveGradient:["#ec4899","#db2777"], footerColor:"#6b21a8", phoneColor:"#4b5563", continentalColor:"#581c87" }
-      default: return { titleGradient:["#f97316","#ea580c"], mrpGradient:["#ef4444","#dc2626"], priceGradient:["#10b981","#059669"], saveGradient:["#3b82f6","#2563eb"], footerColor:"#1e293b", phoneColor:"#64748b", continentalColor:"#0f172a" }
+      case "style1": return { 
+        titleGradient: ["#f97316","#ea580c"], 
+        mrpGradient: ["#FF9933", "#FF9933"], // Indian Saffron (exact flag color)
+        priceGradient: ["#FFFFFF", "#FFFFFF"], // Indian White (exact flag color)
+        saveGradient: ["#138808", "#138808"], // Indian Green (exact flag color)
+        footerColor: "#f97316", 
+        phoneColor: "0f172a", 
+        continentalColor: "#0f172a", 
+        borderColor: "#fdba74",
+        mrpTextColor: "#000000", // Black text for MRP
+        priceTextColor: "#000000", // Black text for Our Price
+        saveTextColor: "#000000" // Black text for Save
+      }
+      case "style2": return { 
+        titleGradient: ["#0ea5e9","#0369a1"], 
+        mrpGradient:["#6366f1","#4f46e5"], 
+        priceGradient:["#0ea5e9","#0369a1"], 
+        saveGradient:["#8b5cf6","#7c3aed"], 
+        footerColor:"#1e40af", 
+        phoneColor:"#374151", 
+        continentalColor:"#1e3a8a", 
+        borderColor:"#93c5fd",
+        mrpTextColor: "#ffffff",
+        priceTextColor: "#ffffff",
+        saveTextColor: "#ffffff"
+      }
+      case "style3": return { 
+        titleGradient: ["#d97706","#b45309"], 
+        mrpGradient:["#ef4444","#dc2626"], 
+        priceGradient:["#d97706","#b45309"], 
+        saveGradient:["#a16207","#854d0e"], 
+        footerColor:"#78350f", 
+        phoneColor:"#57534e", 
+        continentalColor:"#713f12", 
+        borderColor:"#fcd34d",
+        mrpTextColor: "#ffffff",
+        priceTextColor: "#ffffff",
+        saveTextColor: "#ffffff"
+      }
+      case "style4": return { 
+        titleGradient: ["#22c55e","#15803d"], 
+        mrpGradient:["#ef4444","#dc2626"], 
+        priceGradient:["#22c55e","#15803d"], 
+        saveGradient:["#84cc16","#65a30d"], 
+        footerColor:"#166534", 
+        phoneColor:"#374151", 
+        continentalColor:"#14532d", 
+        borderColor:"#86efac",
+        mrpTextColor: "#ffffff",
+        priceTextColor: "#ffffff",
+        saveTextColor: "#ffffff"
+      }
+      case "style5": return { 
+        titleGradient: ["#a855f7","#9333ea"], 
+        mrpGradient:["#ef4444","#dc2626"], 
+        priceGradient:["#a855f7","#9333ea"], 
+        saveGradient:["#ec4899","#db2777"], 
+        footerColor:"#6b21a8", 
+        phoneColor:"#4b5563", 
+        continentalColor:"#581c87", 
+        borderColor:"#d8b4fe",
+        mrpTextColor: "#ffffff",
+        priceTextColor: "#ffffff",
+        saveTextColor: "#ffffff"
+      }
+      default: return { 
+        titleGradient:["#f97316","#ea580c"], 
+        mrpGradient:["#ef4444","#dc2626"], 
+        priceGradient:["#10b981","#059669"], 
+        saveGradient:["#3b82f6","#2563eb"], 
+        footerColor:"#1e293b", 
+        phoneColor:"#64748b", 
+        continentalColor:"#0f172a", 
+        borderColor:"#fdba74",
+        mrpTextColor: "#ffffff",
+        priceTextColor: "#ffffff",
+        saveTextColor: "#ffffff"
+      }
     }
   }
 
@@ -67,55 +143,60 @@ function ImageCreator() {
   const drawOnCanvas = useCallback(
     (ctx, width, height, img) => {
       const colors = getStyleColors(selectedStyle)
-      ctx.fillStyle = "#ffffff"
-      ctx.fillRect(0,0,width,height) // white bg
+      
+      // Add border around the entire canvas
+      const borderWidth = 8;
+      ctx.fillStyle = colors.borderColor;
+      ctx.fillRect(0, 0, width, height); // Fill entire canvas with border color
+      
+      // Draw white background slightly smaller to create border effect
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(borderWidth, borderWidth, width - borderWidth * 2, height - borderWidth * 2);
 
-      // Dynamic font size
-      const getTitleFontSize = (name) => {
-        const maxFont = 50
-        const minFont = 20
-        const maxLength = 25
-        if(!name) return maxFont
-        if(name.length <= maxLength) return maxFont
-        const scale = maxLength / name.length
-        const fontSize = Math.floor(maxFont * scale)
-        return fontSize < minFont ? minFont : fontSize
-      }
-      const titleFontSize = customFontSize || getTitleFontSize(productName)
-      const titleGradient = ctx.createLinearGradient(0,30,0,80)
+      // Fixed font size of 42px
+      const titleFontSize = 42
+      const titleGradient = ctx.createLinearGradient(0,30 + borderWidth,0,80 + borderWidth)
       titleGradient.addColorStop(0, colors.titleGradient[0])
       titleGradient.addColorStop(1, colors.titleGradient[1])
       ctx.fillStyle = titleGradient
-      ctx.font = `${fontWeight} ${titleFontSize}px ${fontStyle}`
+      ctx.font = `bold ${titleFontSize}px 'Segoe UI', Arial, sans-serif`
       ctx.textAlign = "center"
-      ctx.fillText(productName || "Product Name", width/2, 70)
+      
+      // Truncate product name if it's too long
+      const displayName = productName.length > 30 
+        ? productName.substring(0, 27) + "..." 
+        : productName || "Product Name"
+      
+      ctx.fillText(displayName, width/2, 70 + borderWidth)
 
       if(img){
-        const boxY = 100
-        const boxHeight = height-200
+        const boxY = 100 + borderWidth
+        const boxHeight = height-200 - borderWidth
         const imgWidth = width/2 - 60
         const imgHeight = boxHeight
 
         // Left image
         ctx.save()
         ctx.beginPath()
-        ctx.roundRect(40, boxY, imgWidth, imgHeight, 15)
+        ctx.roundRect(40 + borderWidth, boxY, imgWidth, imgHeight, 15)
         ctx.clip()
-        ctx.drawImage(img,40,boxY,imgWidth,imgHeight)
+        ctx.drawImage(img,40 + borderWidth,boxY,imgWidth,imgHeight)
         ctx.restore()
         ctx.strokeStyle = "#e2e8f0"
         ctx.lineWidth = 1
-        ctx.roundRect(40, boxY, imgWidth, imgHeight, 15)
+        ctx.roundRect(40 + borderWidth, boxY, imgWidth, imgHeight, 15)
         ctx.stroke()
 
         // Right price boxes
         const boxX = width/2 + 20
         const boxWidth = width/2 - 60
-        const mrpHeight = boxHeight*0.2
-        const ourPriceHeight = boxHeight*0.6
-        const saveHeight = boxHeight*0.2
+        
+        // Increased heights for MRP and Save boxes
+        const mrpHeight = boxHeight*0.25  // Increased from 0.2 to 0.25
+        const ourPriceHeight = boxHeight*0.5  // Decreased from 0.6 to 0.5 to accommodate larger MRP and Save boxes
+        const saveHeight = boxHeight*0.25  // Increased from 0.2 to 0.25
 
-        // MRP
+        // MRP - Indian Saffron
         const mrpGradient = ctx.createLinearGradient(boxX, boxY, boxX, boxY+mrpHeight)
         mrpGradient.addColorStop(0, colors.mrpGradient[0])
         mrpGradient.addColorStop(1, colors.mrpGradient[1])
@@ -123,14 +204,13 @@ function ImageCreator() {
         ctx.beginPath()
         ctx.roundRect(boxX, boxY, boxWidth, mrpHeight-10, 12)
         ctx.fill()
-        ctx.fillStyle = "#fff"
+        ctx.fillStyle = colors.mrpTextColor
         ctx.textAlign = "center"
-        ctx.font = "600 22px 'Segoe UI'"
-        ctx.fillText("MRP", boxX+boxWidth/2, boxY+mrpHeight/2-5)
-        ctx.font = "bold 26px 'Segoe UI'"
-        ctx.fillText(`₹${mrp||"0"}`, boxX+boxWidth/2, boxY+mrpHeight/2+25)
+        // Increased MRP font size from 28px to 32px
+        ctx.font = "bold 32px 'Segoe UI'"
+        ctx.fillText(`MRP ₹${mrp||"0"}`, boxX+boxWidth/2, boxY+mrpHeight/2+10)
 
-        // Our Price
+        // Our Price - Indian White with EXTREMELY LARGE text
         const priceY = boxY+mrpHeight
         const priceGradient = ctx.createLinearGradient(boxX, priceY, boxX, priceY+ourPriceHeight)
         priceGradient.addColorStop(0, colors.priceGradient[0])
@@ -139,14 +219,18 @@ function ImageCreator() {
         ctx.beginPath()
         ctx.roundRect(boxX, priceY, boxWidth, ourPriceHeight-10, 12)
         ctx.fill()
-        ctx.fillStyle = "#fff"
+        ctx.fillStyle = colors.priceTextColor
         ctx.textAlign = "center"
-        ctx.font = "600 28px 'Segoe UI'"
-        ctx.fillText("Our Price", boxX+boxWidth/2, priceY+ourPriceHeight/2-20)
+        
+        // Very large "Our Price" text - increased from 36px to 40px
         ctx.font = "bold 40px 'Segoe UI'"
-        ctx.fillText(`₹${ourPrice||"0"}`, boxX+boxWidth/2, priceY+ourPriceHeight/2+25)
+        ctx.fillText("Our Price", boxX+boxWidth/2, priceY+ourPriceHeight/2-40)
+        
+        // EXTREMELY large price text - "₹" and price on same line - increased from 70px to 80px
+        ctx.font = "bold 80px 'Segoe UI'"
+        ctx.fillText(`₹${ourPrice||"0"}`, boxX+boxWidth/2, priceY+ourPriceHeight/2+40)
 
-        // Save
+        // Save - Indian Green
         const saveY = priceY+ourPriceHeight
         const saveGradient = ctx.createLinearGradient(boxX, saveY, boxX, saveY+saveHeight)
         saveGradient.addColorStop(0, colors.saveGradient[0])
@@ -155,33 +239,33 @@ function ImageCreator() {
         ctx.beginPath()
         ctx.roundRect(boxX, saveY, boxWidth, saveHeight-10, 12)
         ctx.fill()
-        ctx.fillStyle = "#fff"
+        ctx.fillStyle = colors.saveTextColor
         ctx.textAlign = "center"
-        ctx.font = "600 22px 'Segoe UI'"
-        ctx.fillText("You Save", boxX+boxWidth/2, saveY+saveHeight/2-5)
-        ctx.font = "bold 26px 'Segoe UI'"
-        ctx.fillText(`₹${save||"0"}`, boxX+boxWidth/2, saveY+saveHeight/2+25)
+        // Increased Save font size from 28px to 32px
+        ctx.font = "bold 32px 'Segoe UI'"
+        ctx.fillText(`You Save ₹${save||"0"}`, boxX+boxWidth/2, saveY+saveHeight/2+10)
 
         // Footer
         ctx.fillStyle = colors.footerColor
         ctx.font = "600 26px 'Segoe UI'"
         ctx.textBaseline = "bottom"
         ctx.textAlign = "center"
-        ctx.fillText("Akshaya Super Market, Perambalur", width/2, height-50)
+        ctx.fillText("Akshaya Super Market, Perambalur", width/2, height-50 - borderWidth)
         ctx.fillStyle = colors.phoneColor
         ctx.font = "500 22px 'Segoe UI'"
-        ctx.fillText("📞 9500 080808", width/2, height-20)
+        ctx.fillText("📞 9500 080808", width/2, height-20 - borderWidth)
         ctx.fillStyle = colors.continentalColor
         ctx.font = "italic 22px 'Segoe UI'"
         ctx.textAlign = "right"
-        ctx.fillText("Continental Apply", width-30, height-20)
+        ctx.fillText("Conditional Apply", width-30 - borderWidth, height-20 - borderWidth)
       }
     },
-    [productName, mrp, ourPrice, save, selectedStyle, customFontSize, fontStyle, fontWeight]
+    [productName, mrp, ourPrice, save, selectedStyle]
   )
 
   const handleCreateImage = useCallback(() => {
     if(!image){ setError("Please upload an image first"); return }
+    if(!productName){ setError("Please enter a product name"); return }
     setError("")
     setIsCreating(true)
     setTimeout(()=>{
@@ -200,7 +284,7 @@ function ImageCreator() {
         document.getElementById("preview-section").scrollIntoView({behavior:"smooth"})
       }
     },500)
-  },[image, drawOnCanvas])
+  },[image, productName, drawOnCanvas])
 
   const handleDownload = useCallback(() => {
     if(previewUrl){
@@ -221,9 +305,6 @@ function ImageCreator() {
     setPreviewUrl(null)
     setError("")
     setSelectedStyle("style1")
-    setCustomFontSize(null)
-    setFontStyle("'Segoe UI', Arial, sans-serif")
-    setFontWeight("bold")
   },[])
 
   return (
@@ -251,38 +332,17 @@ function ImageCreator() {
           <div className="space-y-4">
             <div>
               <label className="block font-medium text-gray-700 mb-2">Product Name</label>
-              <input type="text" placeholder="Enter product name" value={productName} onChange={(e)=>setProductName(e.target.value)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"/>
-            </div>
-
-            {/* Font size */}
-            <div>
-              <label className="block font-medium text-gray-700 mb-2">Font Size</label>
-              <input type="range" min="20" max="60" value={customFontSize || 42} onChange={(e)=>setCustomFontSize(parseInt(e.target.value))} className="w-full"/>
-              <p className="text-xs text-gray-500 mt-1">{customFontSize || 42}px</p>
-            </div>
-
-            {/* Font style */}
-            <div>
-              <label className="block font-medium text-gray-700 mb-2">Font Style</label>
-              <select value={fontStyle} onChange={(e)=>setFontStyle(e.target.value)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
-                <option value="'Segoe UI', Arial, sans-serif">Segoe UI</option>
-                <option value="'Arial Black', Gadget, sans-serif">Arial Black</option>
-                <option value="'Courier New', Courier, monospace">Courier New</option>
-                <option value="'Georgia', serif">Georgia</option>
-                <option value="'Tahoma', Geneva, sans-serif">Tahoma</option>
-                <option value="'Verdana', Geneva, sans-serif">Verdana</option>
-                <option value="'Impact', Charcoal, sans-serif">Impact</option>
-                <option value="'Lucida Console', Monaco, monospace">Lucida Console</option>
-              </select>
-            </div>
-
-            {/* Font weight */}
-            <div>
-              <label className="block font-medium text-gray-700 mb-2">Font Weight</label>
-              <select value={fontWeight} onChange={(e)=>setFontWeight(e.target.value)} className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
-                <option value="normal">Normal</option>
-                <option value="bold">Bold</option>
-              </select>
+              <input 
+                type="text" 
+                placeholder="Enter product name" 
+                value={productName} 
+                onChange={handleProductNameChange} 
+                maxLength={30}
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+              />
+              <div className="text-xs text-gray-500 mt-1 text-right">
+                {productName.length}/30 characters
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -325,7 +385,7 @@ function ImageCreator() {
             <h3 className="text-center text-xl font-semibold text-gray-800 mb-4">Offer Card Preview</h3>
             <div className="flex justify-center">
               <div className="relative w-full max-w-lg">
-                <img src={previewUrl} alt="Offer Card" className="w-full rounded-lg border-4 border-orange-500"/>
+                <img src={previewUrl} alt="Offer Card" className="w-full rounded-lg"/>
               </div>
             </div>
             <div className="flex justify-center gap-4 mt-6">
