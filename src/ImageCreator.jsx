@@ -205,9 +205,9 @@ function ImageCreator() {
         const boxWidth = width/2 - 60
         
         // Increased heights for MRP and Save boxes
-        const mrpHeight = boxHeight*0.20  // Increased from 0.2 to 0.25
-        const ourPriceHeight = boxHeight*0.6  // Decreased from 0.6 to 0.5 to accommodate larger MRP and Save boxes
-        const saveHeight = boxHeight*0.20  // Increased from 0.2 to 0.25
+        const mrpHeight = boxHeight*0.25  // Increased from 0.2 to 0.25
+        const ourPriceHeight = boxHeight*0.5  // Decreased from 0.6 to 0.5 to accommodate larger MRP and Save boxes
+        const saveHeight = boxHeight*0.25  // Increased from 0.2 to 0.25
 
         // MRP - Indian Saffron
         const mrpGradient = ctx.createLinearGradient(boxX, boxY, boxX, boxY+mrpHeight)
@@ -352,7 +352,7 @@ function ImageCreator() {
 
           <div className="space-y-4">
             <div>
-              <label className="block font-medium text-gray-700 mb-2">Product Name (max 30 characters)</label>
+              <label className="block font-medium text-gray-700 mb-2">Product Name</label>
               <input 
                 type="text" 
                 placeholder="Enter product name" 
