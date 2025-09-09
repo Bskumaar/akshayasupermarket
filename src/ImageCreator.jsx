@@ -172,7 +172,7 @@ function ImageCreator() {
       titleGradient.addColorStop(0, colors.titleGradient[0])
       titleGradient.addColorStop(1, colors.titleGradient[1])
       ctx.fillStyle = titleGradient
-      ctx.font = `bold ${titleFontSize}px 'Segoe UI', Arial, sans-serif`
+ ctx.font = `bold ${titleFontSize}px Arial, 'Segoe UI', sans-serif`
       ctx.textAlign = "center"
       
       // Truncate product name if it's too long
